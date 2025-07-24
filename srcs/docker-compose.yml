@@ -1,0 +1,52 @@
+services:
+  nginx:
+    build:
+      context: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    networks:
+      - inception
+    volumes:
+      - /Users/anakin/data/wordpress:/var/www/html
+    restart: always
+
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    image: wordpress
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    env_file:
+      - .env
+    networks:
+      - inception
+    volumes:
+      - /Users/anakin/data/wordpress:/var/www/html
+    restart: always
+
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+    image: mariadb
+    container_name: mariadb
+    env_file:
+      - .env
+    volumes:
+      - /Users/anakin/data/mariadb:/var/lib/mysql
+    networks:
+      - inception
+    restart: always
+
+networks:
+  inception:
+    driver: bridge
+
+#keyによってハイフンが必要な時、逆につけてはいけない時、どちらでもいい時がある。
+#named mountとbind mountの違いに注意
+#vmでは　/users/soaoki/dataにvolumeを保管、指定したホストマシンのパスがない時は自動作成される。
+#volumemountの場合、upの時に空のディレクトリがbuildしたイメージに上書きされてしまうので注意。
